@@ -1,3 +1,5 @@
+[Bb]uild/
+
 # Prerequisites
 *.d
 
@@ -30,3 +32,10 @@
 *.exe
 *.out
 *.app
+
+# Switch Homebrew Specific files
+*.elf
+*.nacp
+*.nro
+*.nso
+*.pfs0
