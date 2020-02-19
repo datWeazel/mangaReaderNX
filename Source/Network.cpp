@@ -7,6 +7,7 @@
 #include <curl/curl.h>
 #include <switch.h>
 
+#include <Menu.hpp>
 #include <Logger.hpp>
 #include <Network.hpp>
 
@@ -56,6 +57,13 @@ int download_progress(void *p, double dltotal, double dlnow, double ultotal, dou
     {
         //Update progress display here!
         // dlnow || dltotal
+        popUpBox(fntSmall, 350, 250, SDL_GetColour(white), "Downloading...");
+        // bar max size
+        drawShape(SDL_GetColour(white), 380, 380, DOWNLOAD_BAR_MAX, 30);
+        // progress bar being filled
+        drawShape(SDL_GetColour(faint_blue), 380, 380, (dlnow / dltotal) * DOWNLOAD_BAR_MAX, 30);
+
+        updateRenderer();
     }
     return 0;
 }

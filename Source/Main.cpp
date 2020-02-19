@@ -70,18 +70,17 @@ int main()
     u32 tch = 0;
     touchPosition touch;
 
-    imageLoad(&testImage, "/switch/manga-reader/temp.png");
+    if (!downloadFile("https://mangadex.org/data/b0a98c6a80db6f6aabc301f4c5b50a3e/x36.png", "/switch/manga-reader/temp.png", ON))
+    {
+        imageLoad(&testImage, "/switch/manga-reader/temp.png");
 
-    //TODO:: Scale width = 720 while maintaining aspect ratio
-    int newWidth = 720;
-    int originalWidth, originalHeight;
-    SDL_QueryTexture(testImage, NULL, NULL, &originalWidth, &originalHeight);
+        int newWidth = 720;
+        int originalWidth, originalHeight;
+        SDL_QueryTexture(testImage, NULL, NULL, &originalWidth, &originalHeight);
+        int newHeight = (float)((float)originalHeight / (float)originalWidth) * newWidth;
 
-    Log("Calculating newHeight! ((" + std::to_string(originalHeight) + "/" + std::to_string(originalWidth) + ")*" + std::to_string(newWidth) + ")");
-    int newHeight = (float)((float)originalHeight / (float)originalWidth) * newWidth;
-    Log("newHeight is " + std::to_string(newHeight));
-
-    drawImageScale(testImage, 1280, 0, newWidth, newHeight, 90.0);
+        drawImageScale(testImage, 1280, 0, newWidth, newHeight, 90.0);
+    }
 
     // muh loooooop
     while (appletMainLoop())
