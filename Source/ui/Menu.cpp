@@ -1,11 +1,55 @@
 #include <unistd.h>
 #include <switch.h>
+#include <string>
 
 #include <Util.hpp>
+#include <Logger.hpp>
 #include <ui/Touch.hpp>
 #include <ui/Menu.hpp>
 
 #define APP_VERSION "Weazel Reader: 0.0.1"
+
+// TextCheck callback, this can be removed when not using TextCheck.
+SwkbdTextCheckResult validate_text(char *tmp_string, size_t tmp_string_size)
+{
+    if (strcmp(tmp_string, "bad") == 0)
+    {
+        strncpy(tmp_string, "Bad string.", tmp_string_size);
+        return SwkbdTextCheckResult_Bad;
+    }
+
+    return SwkbdTextCheckResult_OK;
+}
+
+// The rest of these callbacks are for swkbd-inline.
+void finishinit_cb(void)
+{
+    Log("reply: FinishedInitialize\n");
+}
+
+// String changed callback.
+void strchange_cb(const char *string, SwkbdChangedStringArg *arg)
+{
+    //std::string str(string);
+    //Log("reply: ChangedString. str = " + string + ", arg->stringLen = " + std::to_string(arg->stringLen) + ", arg->dicStartCursorPos = " + std::to_string(arg->dicStartCursorPos) + ", arg->dicEndCursorPos = " + std::to_string(arg->dicEndCursorPos) + ", arg->arg->cursorPos =" + std::to_string(arg->cursorPos));
+}
+
+// Moved cursor callback.
+void movedcursor_cb(const char *string, SwkbdMovedCursorArg *arg)
+{
+    //Log("reply: MovedCursor. str = " + std::to_string(string) + ", arg->stringLen = " + std::to_string(arg->stringLen) + ", arg->cursorPos = " + std::to_string(arg->cursorPos));
+}
+
+// Text submitted callback, this is used to get the output text from submit.
+void decidedenter_cb(const char *string, SwkbdDecidedEnterArg *arg)
+{
+    //Log("reply: DecidedEnter. str = " + std::to_string(string) + ", arg->stringLen = " + std::to_string(arg->stringLen));
+}
+
+void decidedcancel_cb(void)
+{
+    //Log("reply: DecidedCancel\n");
+}
 
 void refreshScreen(char loaded)
 {
@@ -34,32 +78,26 @@ void refreshScreen(char loaded)
     }
 }
 
-/*void printOptionList(int cursor)
+void printOptionList(int cursor)
 {
-    refreshScreen(loaded=1);
+    refreshScreen(/*loaded =*/1);
 
-    char *option_list[] = {"Full Atmosphere update (recommended)",
-                           "Update Atmosphere (ignoring .ini files)",
-                           "Update Hekate (for hekate / kosmos users)",
-                           "Update app",
-                           "Reboot (reboot to payload)"};
+    char *option_list[] = {"Search Manga",
+                           "Manga Info"};
 
-    char *description_list[] = {"Update everything for Atmosphere",
-                                "Update Atmosphere ignoring .ini files (if they exist)",
-                                "Update hekate with option to also update Atmosphere",
-                                "Update app and removes old version",
-                                "Reboots switch (recommended after updating)"};
+    char *description_list[] = {"Searches for manga on mangadex.",
+                                "Gets manga info by mangadex-id."};
 
     SDL_Texture *textureArray[] = {ams_icon, ams_plus_icon, hekate_icon, app_icon, reboot_icon};
 
-    for (int i = 0, nl = 0; i < (CURSOR_LIST_MAX + 1); i++, nl += NEWLINE)
+    for (int i = 0, nl = 0; i < (CURSOR_LIST_MAX); i++, nl += NEWLINE)
     {
         if (cursor != i)
             drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(white), option_list[i]);
         else
         {
             // icon for the option selected.
-            drawImage(textureArray[i], 125, 350);
+            drawImage(textureArray[i], 125, 350, 0.0);
             // highlight box.
             drawShape(SDL_GetColour(dark_blue), 530, (FIRST_LINE + nl - HIGHLIGHT_BOX_MIN), 700, HIGHLIGHT_BOX_MAX);
             // option text.
@@ -69,7 +107,6 @@ void refreshScreen(char loaded)
         }
     }
 }
-*/
 
 void popUpBox(TTF_Font *font, int x, int y, SDL_Colour colour, char *text)
 {

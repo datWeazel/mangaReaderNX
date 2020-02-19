@@ -70,7 +70,7 @@ int main()
     u32 tch = 0;
     touchPosition touch;
 
-    if (!downloadFile("https://mangadex.org/data/b0a98c6a80db6f6aabc301f4c5b50a3e/x36.png", "/switch/manga-reader/temp.png", ON))
+    /*if (!downloadFile("https://mangadex.org/data/b0a98c6a80db6f6aabc301f4c5b50a3e/x36.png", "/switch/manga-reader/temp.png", ON))
     {
         imageLoad(&testImage, "/switch/manga-reader/temp.png");
 
@@ -80,7 +80,7 @@ int main()
         int newHeight = (float)((float)originalHeight / (float)originalWidth) * newWidth;
 
         drawImageScale(testImage, 1280, 0, newWidth, newHeight, 90.0);
-    }
+    }*/
 
     // muh loooooop
     while (appletMainLoop())
@@ -92,7 +92,7 @@ int main()
         u32 touch_count = hidTouchCount();
 
         // main menu display
-        //printOptionList(cursor);
+        printOptionList(cursor);
 
         // move cursor down...
         if (kDown & KEY_DOWN)
@@ -118,34 +118,65 @@ int main()
             // check if the user used touch to enter this option.
             if (touch_lock == OFF && touch_count > 0)
                 cursor = touch_cursor(touch.px, touch.py);
-            /*
+
+            Result rc = 0;
+            SwkbdConfig kbd;
+
             switch (cursor)
             {
             case 0:
-                if (yesNoBox(cursor, 390, 250, "Update Atmosphere?") == YES)
-                    //update_ams_hekate(AMS_URL, AMS_OUTPUT, cursor);
-                    break;
+            {
+                //Search manga
+                char searchQuery[32] = {0};
+                rc = swkbdCreate(&kbd, 0);
+                if (R_SUCCEEDED(rc))
+                {
+                    swkbdConfigMakePresetDefault(&kbd);
+                    swkbdConfigSetTextCheckCallback(&kbd, validate_text); //Optional, can be removed if not using TextCheck.
 
+                    rc = swkbdShow(&kbd, searchQuery, sizeof(searchQuery));
+
+                    if (R_SUCCEEDED(rc))
+                    {
+                        Log(searchQuery);
+                        std::string query(searchQuery);
+                        std::string url = "http://192.168.178.68:3000/search/" + query;
+                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_search.txt", 0))
+                        {
+                            Log("Should have gotten search result.");
+                        }
+                    }
+                    swkbdClose(&kbd);
+                }
+            }
+            break;
             case 1:
-                if (yesNoBox(cursor, 390, 250, "Update Atmosphere\n(ignoring .ini files)?") == YES)
-                    //update_ams_hekate(AMS_URL, AMS_OUTPUT, cursor);
-                    break;
+            {
+                //Get manga info
+                char mangaId[32] = {0};
+                rc = swkbdCreate(&kbd, 0);
+                if (R_SUCCEEDED(rc))
+                {
+                    swkbdConfigMakePresetDefault(&kbd);
+                    swkbdConfigSetTextCheckCallback(&kbd, validate_text); //Optional, can be removed if not using TextCheck.
 
-            case 2:
-                if (yesNoBox(cursor, 390, 250, "Update Hekate?") == YES)
-                    //update_ams_hekate(HEKATE_URL, HEKATE_OUTPUT, cursor);
-                    break;
+                    rc = swkbdShow(&kbd, mangaId, sizeof(mangaId));
 
-            case 3:
-                if (yesNoBox(cursor, 390, 250, "Update App?") == YES)
-                    //update_app();
-                    break;
-
-            case 4:
-                if (yesNoBox(cursor, 390, 250, "Reboot to Payload?") == YES)
-                    //reboot_payload("/atmosphere/reboot_payload.bin");
-                    break;
-            }*/
+                    if (R_SUCCEEDED(rc))
+                    {
+                        Log(mangaId);
+                        std::string id(mangaId);
+                        std::string url = "http://192.168.178.68:3000/manga/" + id;
+                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_manga_info.txt", 0))
+                        {
+                            Log("Should have gotten info.");
+                        }
+                    }
+                    swkbdClose(&kbd);
+                }
+                break;
+            }
+            }
         }
 
         // exit...
