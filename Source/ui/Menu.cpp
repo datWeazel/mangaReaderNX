@@ -1,11 +1,13 @@
 #include <unistd.h>
 #include <switch.h>
 #include <string>
+#include <fstream>
 
 #include <Util.hpp>
 #include <Logger.hpp>
 #include <ui/Touch.hpp>
 #include <ui/Menu.hpp>
+#include <nlohmann/json.hpp>
 
 #define APP_VERSION "Weazel Reader: 0.0.1"
 
@@ -112,7 +114,14 @@ void printMangaSearchResults(int cursor)
 {
     refreshScreen(/*loaded =*/1);
 
-    std::string searchResultsJson = get_file_contents("/switch/manga-reader/last_search.json");
+    //std::ifstream jsonFile("/switch/manga-reader/last_search.json");
+    //nlohmann::json mangas;
+    //jsonFile >> mangas;
+
+    //for (auto it = mangas.begin(); it != mangas.end(); ++it)
+    //{
+
+    //}
 
     //TODO:: Parse json, build option_list, display options
 

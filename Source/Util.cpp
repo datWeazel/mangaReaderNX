@@ -84,6 +84,12 @@ std::string get_file_contents(const char *filename)
     //throw(errno);
 }
 
+static void from_json(const nlohmann::json &j, mangaRating &rating)
+{
+    j.at("value").get_to(rating.value);
+    j.at("votes").get_to(rating.votes);
+}
+
 void from_json(const nlohmann::json &j, manga &manga)
 {
     j.at("id").get_to(manga.id);
@@ -92,13 +98,6 @@ void from_json(const nlohmann::json &j, manga &manga)
     j.at("description").get_to(manga.description);
     j.at("views").get_to(manga.views);
     j.at("follows").get_to(manga.follows);
-    //j.at("rating").get_to(manga.rating); //TODO:: Parse rating
-    from_json(j.at("rating"), manga.rating);
+    j.at("rating").get_to(manga.rating);
     j.at("lang_name").get_to(manga.lang_name);
-}
-
-void from_json(const nlohmann::json &j, mangaRating &rating)
-{
-    j.at("value").get_to(rating.value);
-    j.at("votes").get_to(rating.votes);
 }
