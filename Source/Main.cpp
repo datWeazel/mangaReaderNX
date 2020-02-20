@@ -10,8 +10,6 @@
 #include <Network.hpp>
 #include <Logger.hpp>
 
-SDL_Texture *testImage;
-
 int appInit()
 {
     Result rc;
@@ -70,18 +68,6 @@ int main()
     u32 tch = 0;
     touchPosition touch;
 
-    /*if (!downloadFile("https://mangadex.org/data/b0a98c6a80db6f6aabc301f4c5b50a3e/x36.png", "/switch/manga-reader/temp.png", ON))
-    {
-        imageLoad(&testImage, "/switch/manga-reader/temp.png");
-
-        int newWidth = 720;
-        int originalWidth, originalHeight;
-        SDL_QueryTexture(testImage, NULL, NULL, &originalWidth, &originalHeight);
-        int newHeight = (float)((float)originalHeight / (float)originalWidth) * newWidth;
-
-        drawImageScale(testImage, 1280, 0, newWidth, newHeight, 90.0);
-    }*/
-
     // muh loooooop
     while (appletMainLoop())
     {
@@ -91,13 +77,15 @@ int main()
         hidTouchRead(&touch, tch);
         u32 touch_count = hidTouchCount();
 
-        // main menu display
-        printMainMenu(cursor);
+        if (current_screen == MAIN_SCREEN)
+            printMainMenu(cursor);
+        else if (current_screen == SEARCH_RESULT_SCREEN)
+            printMangaSearchResults(cursor);
 
         // move cursor down...
         if (kDown & KEY_DOWN)
         {
-            if (cursor == CURSOR_LIST_MAX)
+            if (cursor == current_max_cursor_pos - 1)
                 cursor = 0;
             else
                 cursor++;
@@ -107,76 +95,79 @@ int main()
         if (kDown & KEY_UP)
         {
             if (cursor == 0)
-                cursor = CURSOR_LIST_MAX;
+                cursor = current_max_cursor_pos;
             else
                 cursor--;
         }
 
         // select option
-        if (kDown & KEY_A || (touch_lock == OFF && touch.px > 530 && touch.px < 1200 && touch.py > FIRST_LINE - HIGHLIGHT_BOX_MIN && touch.py < (NEWLINE * CURSOR_LIST_MAX) + FIRST_LINE + HIGHLIGHT_BOX_MAX))
+        if (kDown & KEY_A || (touch_lock == OFF && touch.px > 530 && touch.px < 1200 && touch.py > FIRST_LINE - HIGHLIGHT_BOX_MIN && touch.py < (NEWLINE * current_max_cursor_pos) + FIRST_LINE + HIGHLIGHT_BOX_MAX))
         {
             // check if the user used touch to enter this option.
             if (touch_lock == OFF && touch_count > 0)
                 cursor = touch_cursor(touch.px, touch.py);
 
-            Result rc = 0;
-            SwkbdConfig kbd;
+            if (current_screen == MAIN_SCREEN)
+            {
+                Result rc = 0;
+                SwkbdConfig kbd;
 
-            switch (cursor)
-            {
-            case 0:
-            {
-                //Search manga
-                char searchQuery[32] = {0};
-                rc = swkbdCreate(&kbd, 0);
-                if (R_SUCCEEDED(rc))
+                switch (cursor)
                 {
-                    swkbdConfigMakePresetDefault(&kbd);
-                    swkbdConfigSetTextCheckCallback(&kbd, validate_text); //Optional, can be removed if not using TextCheck.
-
-                    rc = swkbdShow(&kbd, searchQuery, sizeof(searchQuery));
-
+                case 0:
+                {
+                    //Search manga
+                    char searchQuery[32] = {0};
+                    rc = swkbdCreate(&kbd, 0);
                     if (R_SUCCEEDED(rc))
                     {
-                        Log(searchQuery);
-                        std::string query(searchQuery);
-                        std::string url = "http://192.168.178.68:3000/search/" + query;
-                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_search.json", 0))
-                        {
-                            Log("Should have gotten search result.");
-                            printMangaSearchResults(0);
-                        }
-                    }
-                    swkbdClose(&kbd);
-                }
-            }
-            break;
-            case 1:
-            {
-                //Get manga info
-                char mangaId[32] = {0};
-                rc = swkbdCreate(&kbd, 0);
-                if (R_SUCCEEDED(rc))
-                {
-                    swkbdConfigMakePresetDefault(&kbd);
-                    swkbdConfigSetTextCheckCallback(&kbd, validate_text); //Optional, can be removed if not using TextCheck.
+                        swkbdConfigMakePresetDefault(&kbd);
+                        swkbdConfigSetTextCheckCallback(&kbd, validate_text); //Optional, can be removed if not using TextCheck.
 
-                    rc = swkbdShow(&kbd, mangaId, sizeof(mangaId));
+                        rc = swkbdShow(&kbd, searchQuery, sizeof(searchQuery));
 
-                    if (R_SUCCEEDED(rc))
-                    {
-                        Log(mangaId);
-                        std::string id(mangaId);
-                        std::string url = "http://192.168.178.68:3000/manga/" + id;
-                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_manga_info.json", 0))
+                        if (R_SUCCEEDED(rc))
                         {
-                            Log("Should have gotten info.");
+                            Log(searchQuery);
+                            std::string query(searchQuery);
+                            std::string url = "http://192.168.178.68:3000/search/" + query;
+                            if (!downloadFile(url.c_str(), "/switch/manga-reader/last_search.json", 0))
+                            {
+                                Log("Should have gotten search result.");
+                                current_screen = SEARCH_RESULT_SCREEN;
+                            }
                         }
+                        swkbdClose(&kbd);
                     }
-                    swkbdClose(&kbd);
                 }
                 break;
-            }
+                case 1:
+                {
+                    //Get manga info
+                    char mangaId[32] = {0};
+                    rc = swkbdCreate(&kbd, 0);
+                    if (R_SUCCEEDED(rc))
+                    {
+                        swkbdConfigMakePresetDefault(&kbd);
+                        swkbdConfigSetTextCheckCallback(&kbd, validate_text); //Optional, can be removed if not using TextCheck.
+
+                        rc = swkbdShow(&kbd, mangaId, sizeof(mangaId));
+
+                        if (R_SUCCEEDED(rc))
+                        {
+                            Log(mangaId);
+                            std::string id(mangaId);
+                            std::string url = "http://192.168.178.68:3000/manga/" + id;
+                            if (!downloadFile(url.c_str(), "/switch/manga-reader/last_manga_info.json", 0))
+                            {
+                                Log("Should have gotten info.");
+                            }
+                        }
+                        swkbdClose(&kbd);
+                    }
+                    break;
+                }
+                }
             }
         }
 

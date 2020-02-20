@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <nlohmann/json.hpp>
+
 #define ROOT "/"
 #define APP_PATH "/switch/manga-reader/"
 
@@ -29,3 +32,5 @@ struct manga
     mangaRating rating;
     std::string lang_name;
 };
+static void from_json(const nlohmann::json &j, mangaRating &rating);
+void from_json(const nlohmann::json &j, manga &manga);

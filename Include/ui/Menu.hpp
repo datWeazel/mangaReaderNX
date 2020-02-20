@@ -2,12 +2,17 @@
 
 #include <ui/SDL.hpp>
 
-#define CURSOR_LIST_MAX 2
 #define HIGHLIGHT_BOX_MIN 20
 #define HIGHLIGHT_BOX_MAX 70
 #define NEWLINE 110
 #define FIRST_LINE 130
 #define MAX_STRLEN 512
+
+#define MAIN_SCREEN 0
+#define SEARCH_RESULT_SCREEN 1
+#define MANGA_INFO_SCREEN 2
+
+extern int current_screen;
 
 SwkbdTextCheckResult validate_text(char *tmp_string, size_t tmp_string_size);
 

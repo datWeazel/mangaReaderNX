@@ -11,6 +11,9 @@
 
 #define APP_VERSION "Weazel Reader: 0.0.1"
 
+std::vector<manga> searchResults;
+int current_screen = 0;
+
 // TextCheck callback, this can be removed when not using TextCheck.
 SwkbdTextCheckResult validate_text(char *tmp_string, size_t tmp_string_size)
 {
@@ -60,12 +63,6 @@ void refreshScreen(char loaded)
     // app version.
     drawText(fntMedium, 40, 40, SDL_GetColour(white), APP_VERSION);
 
-    // system version.
-    //drawText(fntSmall, 25, 150, SDL_GetColour(white), getSysVersion());
-
-    // atmosphere version.
-    //drawText(fntSmall, 25, 230, SDL_GetColour(white), getAmsVersion());
-
     if (loaded)
     {
         // write the latest version number, if an update is available
@@ -90,9 +87,11 @@ void printMainMenu(int cursor)
     char *description_list[] = {"Searches for manga on mangadex.",
                                 "Gets manga info by mangadex-id."};
 
+    current_max_cursor_pos = 2;
+
     SDL_Texture *textureArray[] = {ams_icon, ams_plus_icon, hekate_icon, app_icon, reboot_icon};
 
-    for (int i = 0, nl = 0; i < (CURSOR_LIST_MAX); i++, nl += NEWLINE)
+    for (int i = 0, nl = 0; i < current_max_cursor_pos; i++, nl += NEWLINE)
     {
         if (cursor != i)
             drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(white), option_list[i]);
@@ -114,37 +113,38 @@ void printMangaSearchResults(int cursor)
 {
     refreshScreen(/*loaded =*/1);
 
-    std::ifstream jsonFile("/switch/manga-reader/last_search.json");
-    nlohmann::json mangas;
-    jsonFile >> mangas;
-
-    Log("Number of mangas: " + std::to_string(mangas.size()));
+    if (searchResults.size() == 0)
+    {
+        std::ifstream jsonFile("/switch/manga-reader/last_search.json");
+        nlohmann::json results;
+        jsonFile >> results;
+        Log("Number of mangas found: " + std::to_string(results.size()));
+        for (auto result : results)
+        {
+            manga m = result.get<manga>();
+            Log("Manga: " + m.title);
+            searchResults.push_back(m);
+        }
+        current_max_cursor_pos = results.size();
+    }
 
     //TODO:: Parse json, build option_list, display options
-    std::string op1 = "Search Manga (# of last results: " + std::to_string(mangas.size()) + ")";
-    const char *option_list[] = {op1.c_str(),
-                                 "Manga Info"};
-
-    char *description_list[] = {"Searches for manga on mangadex.",
-                                "Gets manga info by mangadex-id."};
-
-    SDL_Texture *textureArray[] = {ams_icon, ams_plus_icon, hekate_icon, app_icon, reboot_icon};
-
-    for (int i = 0, nl = 0; i < (CURSOR_LIST_MAX); i++, nl += NEWLINE)
+    int i = 0, nl = 0;
+    for (manga m : searchResults)
     {
         if (cursor != i)
-            drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(white), option_list[i]);
+            drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(white), m.title.c_str());
         else
         {
-            // icon for the option selected.
-            drawImage(textureArray[i], 125, 350, 0.0);
             // highlight box.
             drawShape(SDL_GetColour(dark_blue), 530, (FIRST_LINE + nl - HIGHLIGHT_BOX_MIN), 700, HIGHLIGHT_BOX_MAX);
             // option text.
-            drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(jordy_blue), option_list[i]);
+            drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(jordy_blue), m.title.c_str());
             // description.
-            drawText(fntSmall, 25, 675, SDL_GetColour(white), description_list[i]);
+            drawText(fntSmall, 25, 675, SDL_GetColour(white), m.description.c_str());
         }
+        i++;
+        nl += NEWLINE;
     }
 }
 
@@ -211,26 +211,4 @@ void errorBox(int x, int y, char *errorText)
     updateRenderer();
 
     sleep(3);
-}
-
-int touch_cursor(int x, int y)
-{
-    int cursor = 0;
-
-    for (int nl = 0; cursor < (CURSOR_LIST_MAX + 1); cursor++, nl += NEWLINE)
-        if (y > (FIRST_LINE + nl - HIGHLIGHT_BOX_MIN) && y < (FIRST_LINE + nl + NEWLINE - HIGHLIGHT_BOX_MIN))
-            break;
-
-    return cursor;
-}
-
-int touch_yes_no_option(int x, int y)
-{
-    if (x > 380 && x < 555 && y > 410 && y < 475)
-        return NO;
-
-    if (x > 700 && x < 890 && y > 410 && y < 475)
-        return YES;
-
-    return 1;
 }
