@@ -144,6 +144,7 @@ int main()
                         if (!downloadFile(url.c_str(), "/switch/manga-reader/last_search.json", 0))
                         {
                             Log("Should have gotten search result.");
+                            printMangaSearchResults(0);
                         }
                     }
                     swkbdClose(&kbd);

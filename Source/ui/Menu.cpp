@@ -114,19 +114,16 @@ void printMangaSearchResults(int cursor)
 {
     refreshScreen(/*loaded =*/1);
 
-    //std::ifstream jsonFile("/switch/manga-reader/last_search.json");
-    //nlohmann::json mangas;
-    //jsonFile >> mangas;
+    std::ifstream jsonFile("/switch/manga-reader/last_search.json");
+    nlohmann::json mangas;
+    jsonFile >> mangas;
 
-    //for (auto it = mangas.begin(); it != mangas.end(); ++it)
-    //{
-
-    //}
+    Log("Number of mangas: " + std::to_string(mangas.size()));
 
     //TODO:: Parse json, build option_list, display options
-
-    char *option_list[] = {"Search Manga",
-                           "Manga Info"};
+    std::string op1 = "Search Manga (# of last results: " + std::to_string(mangas.size()) + ")";
+    const char *option_list[] = {op1.c_str(),
+                                 "Manga Info"};
 
     char *description_list[] = {"Searches for manga on mangadex.",
                                 "Gets manga info by mangadex-id."};
