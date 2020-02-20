@@ -81,11 +81,11 @@ void printMainMenu(int cursor)
 {
     refreshScreen(/*loaded =*/1);
 
-    char *option_list[] = {"Search Manga",
-                           "Manga Info"};
+    const char *option_list[] = {"Search Manga",
+                                 "Manga Info"};
 
-    char *description_list[] = {"Searches for manga on mangadex.",
-                                "Gets manga info by mangadex-id."};
+    const char *description_list[] = {"Searches for manga on mangadex.",
+                                      "Gets manga info by mangadex-id."};
 
     current_max_cursor_pos = 2;
 
