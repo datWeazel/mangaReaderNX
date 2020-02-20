@@ -92,7 +92,7 @@ int main()
         u32 touch_count = hidTouchCount();
 
         // main menu display
-        printOptionList(cursor);
+        printMainMenu(cursor);
 
         // move cursor down...
         if (kDown & KEY_DOWN)
@@ -141,7 +141,7 @@ int main()
                         Log(searchQuery);
                         std::string query(searchQuery);
                         std::string url = "http://192.168.178.68:3000/search/" + query;
-                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_search.txt", 0))
+                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_search.json", 0))
                         {
                             Log("Should have gotten search result.");
                         }
@@ -167,7 +167,7 @@ int main()
                         Log(mangaId);
                         std::string id(mangaId);
                         std::string url = "http://192.168.178.68:3000/manga/" + id;
-                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_manga_info.txt", 0))
+                        if (!downloadFile(url.c_str(), "/switch/manga-reader/last_manga_info.json", 0))
                         {
                             Log("Should have gotten info.");
                         }

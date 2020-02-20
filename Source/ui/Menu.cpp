@@ -78,9 +78,43 @@ void refreshScreen(char loaded)
     }
 }
 
-void printOptionList(int cursor)
+void printMainMenu(int cursor)
 {
     refreshScreen(/*loaded =*/1);
+
+    char *option_list[] = {"Search Manga",
+                           "Manga Info"};
+
+    char *description_list[] = {"Searches for manga on mangadex.",
+                                "Gets manga info by mangadex-id."};
+
+    SDL_Texture *textureArray[] = {ams_icon, ams_plus_icon, hekate_icon, app_icon, reboot_icon};
+
+    for (int i = 0, nl = 0; i < (CURSOR_LIST_MAX); i++, nl += NEWLINE)
+    {
+        if (cursor != i)
+            drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(white), option_list[i]);
+        else
+        {
+            // icon for the option selected.
+            drawImage(textureArray[i], 125, 350, 0.0);
+            // highlight box.
+            drawShape(SDL_GetColour(dark_blue), 530, (FIRST_LINE + nl - HIGHLIGHT_BOX_MIN), 700, HIGHLIGHT_BOX_MAX);
+            // option text.
+            drawText(fntSmall, 550, FIRST_LINE + nl, SDL_GetColour(jordy_blue), option_list[i]);
+            // description.
+            drawText(fntSmall, 25, 675, SDL_GetColour(white), description_list[i]);
+        }
+    }
+}
+
+void printMangaSearchResults(int cursor)
+{
+    refreshScreen(/*loaded =*/1);
+
+    std::string searchResultsJson = get_file_contents("/switch/manga-reader/last_search.json");
+
+    //TODO:: Parse json, build option_list, display options
 
     char *option_list[] = {"Search Manga",
                            "Manga Info"};

@@ -40,7 +40,7 @@ TARGET		:=	Manga-reader
 BUILD		:=	Build
 SOURCES	:=	Source Source/ui
 DATA		:=	Bin
-INCLUDES	:=	Include Include/ui
+INCLUDES	:=	Include Include/ui Include/nlohmann
 EXEFS_SRC	:=	exefs_src
 ROMFS		:=	RomFs
 

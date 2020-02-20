@@ -1,9 +1,12 @@
 #include <stdio.h>
-#include <string.h>
 #include <switch.h>
+#include <fstream>
+#include <string>
+#include <cerrno>
 
 #include <Util.hpp>
 #include <ui/Menu.hpp>
+#include <nlohmann/json.hpp>
 
 #define TEMP_FILE "/switch/manga-reader/temp"
 #define FILTER_STRING "browser_download_url\":\""
@@ -62,4 +65,40 @@ int parseSearch(char *parse_string, char *filter, char *new_string)
     errorBox(350, 250, "Failed to find parse url!");
     fclose(fp);
     return 1;
+}
+
+std::string get_file_contents(const char *filename)
+{
+    std::ifstream in(filename, std::ios::in | std::ios::binary);
+    if (in)
+    {
+        std::string contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&contents[0], contents.size());
+        in.close();
+        return (contents);
+    }
+    return ("error");
+    //throw(errno);
+}
+
+void from_json(const nlohmann::json &j, manga &manga)
+{
+    j.at("id").get_to(manga.id);
+    j.at("title").get_to(manga.title);
+    j.at("image_url").get_to(manga.image_url);
+    j.at("description").get_to(manga.description);
+    j.at("views").get_to(manga.views);
+    j.at("follows").get_to(manga.follows);
+    //j.at("rating").get_to(manga.rating); //TODO:: Parse rating
+    from_json(j.at("rating"), manga.rating);
+    j.at("lang_name").get_to(manga.lang_name);
+}
+
+void from_json(const nlohmann::json &j, mangaRating &rating)
+{
+    j.at("value").get_to(rating.value);
+    j.at("votes").get_to(rating.votes);
 }

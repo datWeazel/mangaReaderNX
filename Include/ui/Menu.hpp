@@ -19,8 +19,9 @@ void movedcursor_cb(const char *str, SwkbdMovedCursorArg *arg);   // Moved curso
 void decidedenter_cb(const char *str, SwkbdDecidedEnterArg *arg); // Text submitted callback, this is used to get the output text from submit.
 void decidedcancel_cb(void);
 
-void refreshScreen(char loaded);                                            // clear screen, display background with title
-void printOptionList(int cursor);                                           // print list of options
+void refreshScreen(char loaded); // clear screen, display background with title
+void printMainMenu(int cursor);  // print list of options
+void printMangaSearchResults(int cursor);
 void popUpBox(TTF_Font *font, int x, int y, SDL_Colour colour, char *text); // pop-up box in center of screen
 int yesNoBox(int mode, int x, int y, char *question);                       // box with yes or no option
 void errorBox(int x, int y, char *errorText);                               // used for displaying error messages
